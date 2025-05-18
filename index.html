@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Attendance Skip Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-family-primary: 'Poppins', sans-serif;
+            --font-family-secondary: 'Inter', sans-serif;
+            --primary-color: #2563EB;
+            --primary-hover-color: #1D4ED8;
+            --secondary-color: #4B5563;
+            --light-gray: #F9FAFB;
+            --medium-gray: #E5E7EB;
+            --dark-gray: #1F2937;
+            --card-bg: #ffffff;
+            --success-color: #059669;
+            --success-bg: #D1FAE5;
+            --danger-color: #DC2626;
+            --danger-bg: #FEE2E2;
+            --info-color: #2563EB; 
+            --info-bg: #EFF6FF;   
+            --warning-color: #F59E0B;
+            --warning-bg: #FEF3C7;
+
+            --border-radius-lg: 12px;
+            --border-radius-md: 8px;
+            --border-radius-sm: 6px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family-secondary);
+            background-color: #E0E7FF; color: var(--dark-gray);
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; padding: 40px 20px; line-height: 1.65;
+        }
+        .app-container {
+            background-color: var(--light-gray); border-radius: var(--border-radius-lg);
+            padding: 30px 35px; box-shadow: var(--shadow-lg);
+            width: 100%; max-width: 720px;
+        }
+        header { text-align: center; margin-bottom: 35px; }
+        header h1 { font-family: var(--font-family-primary); color: var(--primary-color); font-size: 2.1em; font-weight: 700; letter-spacing: -0.5px; }
+        header p { font-size: 0.95em; color: var(--secondary-color); margin-top: 5px; }
+
+        .input-section, .results-card {
+            margin-bottom: 30px; padding: 25px; background-color: var(--card-bg);
+            border: 1px solid var(--medium-gray); border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        .input-section h2, .results-card h2 {
+            font-family: var(--font-family-primary); font-size: 1.3em; color: var(--dark-gray);
+            margin-bottom: 25px; padding-bottom: 12px;
+            border-bottom: 1px solid var(--medium-gray); font-weight: 600;
+        }
+         .results-card h2 { font-size: 1.6em; text-align:center; }
+         .results-card h3 { font-family: var(--font-family-primary); font-size: 1.3em; color: var(--primary-color); margin-top:0; margin-bottom: 20px; text-align:center; font-weight: 600;}
+
+        .class-input { background-color: #F9FAFB; padding: 20px; margin-bottom: 20px; border-radius: var(--border-radius-md); border: 1px solid #E5E7EB; position: relative; }
+        .form-group { margin-bottom: 22px; } .form-group:last-child { margin-bottom: 0; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--secondary-color); font-size: 0.9em; }
+
+        .stepper-input { display: flex; align-items: center; border: 1px solid var(--medium-gray); border-radius: var(--border-radius-sm); overflow: hidden; width: fit-content; background-color: var(--card-bg); }
+        .stepper-btn { background-color: var(--light-gray); color: var(--secondary-color); border: none; width: 40px; height: 40px; cursor: pointer; font-size: 1.1em; font-weight: 400; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease, color 0.2s ease; }
+        .stepper-btn:hover:not(:disabled) { background-color: var(--primary-color); color: white; }
+        .stepper-btn:disabled { color: #B0B0B0; cursor: not-allowed; background-color: #E9ECEF; }
+        .stepper-btn.plus { border-left: 1px solid var(--medium-gray); }
+        .stepper-btn.minus { border-right: 1px solid var(--medium-gray); }
+        .stepper-value { font-size: 1em; font-weight: 500; min-width: 50px; text-align: center; padding: 0 15px; color: var(--dark-gray); height: 40px; line-height: 40px; }
+
+        input[type="text"] { width: 100%; padding: 10px 12px; height: 42px; border: 1px solid var(--medium-gray); border-radius: var(--border-radius-sm); font-size: 1em; color: var(--dark-gray); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        input[type="text"]:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+
+        .btn { border: none; padding: 10px 20px; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 0.95em; font-weight: 500; transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        .btn:hover { transform: translateY(-1px); } .btn:active { transform: translateY(0px); }
+        .btn-secondary { background-color: var(--card-bg); color: var(--dark-gray); border: 1px solid var(--medium-gray); }
+        .btn-secondary:hover { background-color: #F3F4F6; }
+        .btn-warning { background-color: var(--warning-color); color: var(--dark-gray); }
+        .btn-warning:hover { background-color: #FBBF24; }
+
+        .class-controls { margin-bottom: 25px; text-align: center; }
+        #add-class.btn-secondary { padding: 10px 15px; font-size: 0.9em;}
+
+        button.remove-class-btn { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--secondary-color); font-size: 1.3em; cursor: pointer; padding: 5px; line-height: 1; border-radius: 50%; width: 30px; height: 30px; }
+        button.remove-class-btn:hover { color: #DC2626; background-color: #FEE2E2; }
+
+        .btn-calculate, .btn-recalculate { background-color: var(--success-color); color: white; width: 100%; padding: 14px 20px; font-size: 1.1em; font-weight: 600; margin-top: 10px; border-radius: var(--border-radius-md);}
+        .btn-calculate:hover, .btn-recalculate:hover { background-color: #047857; box-shadow: var(--shadow-sm); }
+        .btn-recalculate { background-color: var(--warning-color); color: var(--dark-gray); margin-top:20px;}
+
+        .results { margin-top: 40px; padding: 0; border: none; background-color: transparent; display: none; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .results-card:last-child { margin-bottom: 0;}
+        
+        #semester-overview-text p, #remaining-overview-text p, #current-attendance-details p { font-size: 0.95em; margin-bottom: 10px; color: var(--secondary-color); display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #E5E7EB; }
+        #semester-overview-text p:last-child, #remaining-overview-text p:last-child, #current-attendance-details p:last-child { border-bottom: none; }
+        #semester-overview-text p strong:first-child, #remaining-overview-text p strong:first-child, #current-attendance-details p strong:first-child { color: var(--dark-gray); font-weight: 500; }
+        #semester-overview-text p .value, #remaining-overview-text p .value, #current-attendance-details p .value { font-weight: 600; color: var(--dark-gray); }
+
+        .status-badge { font-family: var(--font-family-primary); font-weight: 600; padding: 10px 20px; border-radius: var(--border-radius-sm); display: inline-block; font-size: 1em; text-transform: uppercase; letter-spacing: 0.8px; border-width: 2px; border-style: solid; }
+        .status-badge .icon { margin-right: 8px; font-size: 1.1em; }
+        .status-badge.safe { background-color: var(--success-bg); color: var(--success-color); border-color: var(--success-color); }
+        .status-badge.danger { background-color: var(--danger-bg); color: var(--danger-color); border-color: var(--danger-color); }
+
+
+        .skippable-hours-highlight { background-color: var(--info-bg); border: 1px solid var(--info-color); border-radius: var(--border-radius-md); padding: 20px; text-align: center; margin: 0 0 25px 0; }
+        .skippable-hours-highlight .label { display: block; font-size: 1em; color: var(--info-color); margin-bottom: 8px; font-weight: 500; }
+        .skippable-hours-highlight .hours-value { font-family: var(--font-family-primary); font-size: 2.2em; font-weight: 700; color: var(--info-color); display: block; }
+        .skippable-hours-highlight .hours-value.zero { color: var(--secondary-color); }
+        .skippable-hours-highlight .clarification { font-size: 0.85em; color: var(--secondary-color); margin-top: 10px; }
+
+        .results-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; font-size: 0.9em; border: 1px solid var(--medium-gray); border-radius: var(--border-radius-md); overflow: hidden; }
+        .results-table th, .results-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--medium-gray); }
+        .results-table th { background-color: #F9FAFB; font-weight: 600; color: var(--secondary-color); text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px; }
+        .results-table tr:last-child td { border-bottom: none; }
+        .results-table tr:nth-child(even) td { background-color: #F9FAFB; }
+        .results-table td:nth-child(3) { font-weight: 600; color: var(--primary-color); font-size: 1.1em; text-align: center;}
+
+.combinations-display-list {
+    list-style-type: none; /* This removes the bullet points */
+    padding-left: 0;       /* Also remove default browser padding for ul */
+    /* ... any existing styles for .combinations-display-list ... */
+}
+
+/* Your existing styles for the <li> items within this list */
+.combinations-display-list li { 
+    background-color: #F0F9FF; 
+    padding: 12px 18px; 
+    border-radius: var(--border-radius-sm); 
+    margin-bottom: 10px; 
+    border: 1px solid #BEE3F8; 
+    font-size: 0.95em; 
+    color: var(--dark-gray); 
+}
+.combinations-display-list li strong { 
+    color: var(--primary-hover-color); 
+    font-weight: 600; 
+}
+.combinations-display-list li .total-hours-used { 
+    font-size: 0.85em; 
+    color: var(--secondary-color); 
+    display: block; 
+    margin-top: 4px; 
+}
+        .clarification-note small { font-weight: 400; color: var(--secondary-color); }
+
+        #already-skipped-section { display: none; }
+        .skipped-class-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background-color: #F9FAFB; border-radius: var(--border-radius-sm); border: 1px solid #E5E7EB;}
+        .skipped-class-item label { margin-bottom: 0; flex-basis: 50%;}
+
+        @media (max-width: 600px) {
+            body { padding: 20px 10px; }
+            .app-container { padding: 20px 15px; }
+            header h1 { font-size: 1.8em; }
+            .input-section, .results-card { padding: 20px; }
+            .input-section h2, .results-card h2 { font-size: 1.15em; }
+            .stepper-input { width: auto; }
+            .skipped-class-item { flex-direction: column; align-items: flex-start; gap: 8px;}
+            .skipped-class-item label {flex-basis: auto;}
+            .skippable-hours-highlight .hours-value { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🗓️ Dynamic Attendance Skip Planner</h1>
+            <p>Plan your semester, then track skips & update your remaining allowance!</p>
+        </header>
+        
+        <div class="input-section" id="initial-setup-section">
+            <h2>1. Class Setup <span style="font-weight:400; font-size: 0.8em;">(Calculated over 12 Weeks)</span></h2>
+            <div class="class-controls">
+                <button id="add-class" class="btn btn-secondary">➕ Add Class Type</button>
+            </div>
+            <div id="class-inputs"></div>
+            <button id="calculate-initial-btn" class="btn btn-calculate">🧮 Calculate Initial Allowance</button>
+        </div>
+        
+        <div class="results" id="initial-results">
+            <div class="results-card" id="overview-card">
+                <h2>Semester Attendance Overview</h2>
+                <div id="semester-overview-text"></div>
+            </div>
+            <div class="results-card" id="initial-skippable-card">
+                <h3>🎯 Your Total Initial Skippable Hours Budget</h3>
+                <div class="skippable-hours-highlight" id="initial-skippable-hours-container">
+                    <span class="label">Total Hours You Can Miss (20% Buffer):</span>
+                    <span class="hours-value" id="total-allowed-missed-value">0.0</span>
+                    <p class="clarification">This is your total "budget" for skipping classes across the 12 weeks. Use the "Track Skips" section below to update this budget as the semester progresses.</p>
+                </div>
+                <h3 style="margin-top: 30px;">📋 Max Sessions to Skip <small>(If Using Entire Budget on One Type)</small></h3>
+                <table class="results-table" id="initial-skippable-table">
+                    <thead><tr><th>Class Type</th><th>Hours/Session</th><th>Max Sessions (Individually)</th></tr></thead>
+                    <tbody id="initial-skippable-body"></tbody>
+                </table>
+            </div>
+            <div class="results-card" id="initial-combinations-card" style="display:none;">
+                <h3>🔄 Optimal Initial Skipping Combinations</h3>
+                <p class="clarification-note" id="initial-combinations-intro"></p>
+                <ul id="initial-combinations-list" class="combinations-display-list"></ul>
+            </div>
+        </div>
+
+        <div class="input-section" id="already-skipped-section">
+            <h2>2. Track Your Skips & Update Allowance</h2>
+            <p style="font-size:0.9em; color: var(--secondary-color); margin-bottom:20px;">Enter how many sessions of each class type you've already skipped to see your remaining skippable budget and current attendance status.</p>
+            <div id="already-skipped-inputs"></div>
+            <button id="recalculate-remaining-btn" class="btn btn-recalculate">🔄 Recalculate Remaining Skips</button>
+        </div>
+
+        <div class="results" id="remaining-results" style="margin-top:10px;">
+             <div class="results-card" id="current-status-card" style="display:none;">
+                <h3>📊 Current Attendance Status</h3>
+                <div id="current-attendance-status-display" style="text-align:center; margin-bottom:15px;"></div>
+                <div id="current-attendance-details"></div>
+            </div>
+            <div class="results-card" id="remaining-overview-card" style="display:none;">
+                <h3><span style="font-size: 0.8em; display: block; color: var(--secondary-color); font-weight:400;">After accounting for skips so far:</span>Current Remaining Skippable Budget</h3>
+                <div id="remaining-overview-text"></div>
+            </div>
+            <div class="results-card" id="remaining-combinations-card" style="display:none;">
+                <h3>🔄 Optimal Remaining Skipping Combinations</h3>
+                <p class="clarification-note" id="remaining-combinations-intro"></p>
+                <ul id="remaining-combinations-list" class="combinations-display-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let classCounter = 0;
+        let initialDefinedClasses = []; 
+        let initialTotalAllowedToMissHours = 0;
+        let initialTotalRequiredHoursGlobal = 0; // Store this globally
+
+        function updateStepper(stepperId, operation, minVal, stepVal, isFloat = false, targetInputId = null) {
+            const stepperContainer = document.getElementById(stepperId);
+            if (!stepperContainer) return;
+
+            const valueDisplay = stepperContainer.querySelector('.stepper-value');
+            const valueStore = targetInputId ? document.getElementById(targetInputId) : stepperContainer.querySelector('input[type="number"], input[type="hidden"]'); // Should be hidden for class setup
+            const minusBtn = stepperContainer.querySelector('.stepper-btn.minus');
+            
+            let currentValue = isFloat ? parseFloat(valueStore.value) : parseInt(valueStore.value);
+            if(isNaN(currentValue)) currentValue = minVal; 
+
+            if (operation === 'plus') currentValue += stepVal;
+            else if (operation === 'minus') currentValue -= stepVal;
+            
+            currentValue = Math.max(minVal, currentValue);
+            currentValue = isFloat ? parseFloat(currentValue.toFixed(1)) : currentValue;
+
+            if (valueDisplay) valueDisplay.textContent = isFloat ? currentValue.toFixed(1) : currentValue;
+            valueStore.value = currentValue; 
+
+            if (minusBtn) minusBtn.disabled = currentValue <= minVal;
+        }
+
+        function createClassInput(id, defaultValues = {}) {
+            const newClassDiv = document.createElement('div');
+            newClassDiv.className = 'class-input';
+            newClassDiv.id = `class-${id}`;
+            const defaultName = defaultValues.name || '';
+            const defaultHours = parseFloat(defaultValues.hours || 2);
+            const defaultWeekly = parseInt(defaultValues.weekly || 1);
+            newClassDiv.innerHTML = `
+                <button class="remove-class-btn" onclick="removeClass(${id})" aria-label="Remove this class type" title="Remove class type">✖</button>
+                <div class="class-details">
+                    <div class="form-group"><label for="class-name-${id}">Class Type Name:</label><input type="text" id="class-name-${id}" placeholder="e.g., Lecture, Lab" value="${defaultName}"></div>
+                    <div class="form-group"><label>Hours per Class Session:</label><div class="stepper-input" id="stepper-class-hours-${id}"><button type="button" class="stepper-btn minus" ${defaultHours <= 0.5 ? 'disabled' : ''}>－</button><span class="stepper-value">${defaultHours.toFixed(1)}</span><button type="button" class="stepper-btn plus">＋</button><input type="hidden" id="class-hours-${id}" value="${defaultHours.toFixed(1)}"></div></div>
+                    <div class="form-group"><label>Number of Sessions per Week:</label><div class="stepper-input" id="stepper-class-weekly-${id}"><button type="button" class="stepper-btn minus" ${defaultWeekly <= 1 ? 'disabled' : ''}>－</button><span class="stepper-value">${defaultWeekly}</span><button type="button" class="stepper-btn plus">＋</button><input type="hidden" id="class-weekly-${id}" value="${defaultWeekly}"></div></div>
+                </div>`;
+            const hoursStepper = newClassDiv.querySelector(`#stepper-class-hours-${id}`);
+            hoursStepper.querySelector('.plus').addEventListener('click', () => updateStepper(`stepper-class-hours-${id}`, 'plus', 0.5, 0.5, true, `class-hours-${id}`));
+            hoursStepper.querySelector('.minus').addEventListener('click', () => updateStepper(`stepper-class-hours-${id}`, 'minus', 0.5, 0.5, true, `class-hours-${id}`));
+            const weeklyStepper = newClassDiv.querySelector(`#stepper-class-weekly-${id}`);
+            weeklyStepper.querySelector('.plus').addEventListener('click', () => updateStepper(`stepper-class-weekly-${id}`, 'plus', 1, 1, false, `class-weekly-${id}`));
+            weeklyStepper.querySelector('.minus').addEventListener('click', () => updateStepper(`stepper-class-weekly-${id}`, 'minus', 1, 1, false, `class-weekly-${id}`));
+            return newClassDiv;
+        }
+
+        function addClass(defaultValues = {}) {
+            const classInputs = document.getElementById('class-inputs');
+            const newClassDiv = createClassInput(classCounter, defaultValues);
+            classInputs.appendChild(newClassDiv);
+            const firstInput = newClassDiv.querySelector('input[type="text"]');
+            if (firstInput) firstInput.focus();
+            classCounter++;
+        }
+        document.getElementById('add-class').addEventListener('click', () => addClass());
+
+        function removeClass(id) {
+            const classInputs = document.getElementById('class-inputs');
+            const classToRemove = document.getElementById(`class-${id}`);
+            if (classInputs.children.length > 1) classInputs.removeChild(classToRemove);
+            else alert("Oops! You need at least one class type defined.");
+        }
+
+        function populateAlreadySkippedInputs() {
+            const container = document.getElementById('already-skipped-inputs');
+            container.innerHTML = ''; 
+            initialDefinedClasses.forEach((cls) => { // Use cls.id for unique IDs
+                const div = document.createElement('div');
+                div.className = 'skipped-class-item';
+                div.innerHTML = `
+                    <label for="skipped-count-${cls.id}">${cls.name} (à ${cls.hoursPerClass.toFixed(1)} hrs):</label>
+                    <div class="stepper-input" id="stepper-skipped-${cls.id}">
+                        <button type="button" class="stepper-btn minus" disabled>－</button>
+                        <span class="stepper-value">0</span>
+                        <button type="button" class="stepper-btn plus">＋</button>
+                        <input type="hidden" id="skipped-count-${cls.id}" value="0" data-hours-per-class="${cls.hoursPerClass}">
+                    </div>
+                `;
+                container.appendChild(div);
+                const stepperId = `stepper-skipped-${cls.id}`;
+                const hiddenInputId = `skipped-count-${cls.id}`;
+                // Max skips for this class type should not exceed total sessions possible (weekly * 12)
+                const maxPossibleSessions = cls.weeklyCount * 12; 
+                div.querySelector('.plus').addEventListener('click', () => updateStepper(stepperId, 'plus', 0, 1, false, hiddenInputId)); // Max not strictly enforced here, but could be
+                div.querySelector('.minus').addEventListener('click', () => updateStepper(stepperId, 'minus', 0, 1, false, hiddenInputId));
+            });
+        }
+        
+        function generateAndDisplayCombinations(targetBudget, classesArray, listElementId, introElementId, introTextPrefix) {
+            const listElement = document.getElementById(listElementId);
+            const introElement = document.getElementById(introElementId);
+            const combinationsCardElement = document.getElementById(listElementId.replace('-list', '-card'));
+            listElement.innerHTML = '';
+            let allCombinations = [];
+
+            if (targetBudget > 0.01 && classesArray.length > 0) {
+                function findCombinationsRecursive(classIdx, budgetUsed, counts) {
+                    if (classIdx === classesArray.length) {
+                        if (budgetUsed > 0.01) {
+                            const detail = []; let hours = 0;
+                            for (let i = 0; i < classesArray.length; i++) {
+                                if (counts[i] > 0) {
+                                    detail.push({ name: classesArray[i].name, count: counts[i] });
+                                    hours += counts[i] * classesArray[i].hoursPerClass;
+                                }
+                            }
+                            if (detail.length > 0) allCombinations.push({ details: detail, totalHoursUsed: parseFloat(hours.toFixed(2)) });
+                        }
+                        return;
+                    }
+                    const currentCls = classesArray[classIdx];
+                    const remainingForThis = targetBudget - budgetUsed;
+                    const maxCanSkip = (currentCls.hoursPerClass > 0) ? Math.floor(remainingForThis / currentCls.hoursPerClass) : 0;
+                    for (let num = 0; num <= maxCanSkip; num++) {
+                        counts[classIdx] = num;
+                        findCombinationsRecursive(classIdx + 1, budgetUsed + (num * currentCls.hoursPerClass), counts);
+                    }
+                    counts[classIdx] = 0;
+                }
+                findCombinationsRecursive(0, 0, new Array(classesArray.length).fill(0));
+
+                if (allCombinations.length > 0) {
+                    let maxHoursInCombos = 0;
+                    allCombinations.forEach(c => { if (c.totalHoursUsed > maxHoursInCombos) maxHoursInCombos = c.totalHoursUsed; });
+                    
+                    let optimalCombos = allCombinations.filter(c => Math.abs(c.totalHoursUsed - maxHoursInCombos) < 0.01);
+                    optimalCombos.sort((a, b) => {
+                        const itemsA = a.details.reduce((s, d) => s + d.count, 0);
+                        const itemsB = b.details.reduce((s, d) => s + d.count, 0);
+                        if (itemsA !== itemsB) return itemsA - itemsB;
+                        return a.details[0].name.localeCompare(b.details[0].name);
+                    });
+
+                    const MAX_TO_SHOW = 15;
+                    const toShow = optimalCombos.slice(0, MAX_TO_SHOW);
+
+                    if (toShow.length > 0) {
+                        combinationsCardElement.style.display = 'block';
+                        introElement.textContent = `${introTextPrefix} (maximally using ${maxHoursInCombos.toFixed(1)} hours):`;
+                        if (optimalCombos.length > MAX_TO_SHOW) introElement.textContent += ` (Showing top ${MAX_TO_SHOW} of ${optimalCombos.length} optimal possibilities)`;
+                        
+                        toShow.forEach(combo => {
+                            let liHTML = '<li>';
+                            let parts = combo.details.map(d => `<strong>${d.count} ${d.name}${d.count !== 1 ? 's' : ''}</strong>`);
+                            liHTML += parts.join(' AND ');
+                            liHTML += `<span class="total-hours-used">(Uses ${combo.totalHoursUsed.toFixed(1)} of ${targetBudget.toFixed(1)} available hours)</span></li>`;
+                            listElement.innerHTML += liHTML;
+                        });
+                    } else { noCombinationsMessage(targetBudget, listElementId, introElementId, combinationsCardElement); }
+                } else { noCombinationsMessage(targetBudget, listElementId, introElementId, combinationsCardElement); }
+            } else {
+                 combinationsCardElement.style.display = 'none';
+            }
+        }
+        function noCombinationsMessage(budget, listElId, introElId, cardEl){
+            cardEl.style.display = 'block';
+            document.getElementById(introElId).textContent = `For your ${budget.toFixed(1)} skippable hours budget:`;
+            document.getElementById(listElId).innerHTML = '<li>No specific multi-class skipping combinations found. You might only be able to skip individual class types as per the table above, or the budget is too small.</li>';
+        }
+
+        document.getElementById('calculate-initial-btn').addEventListener('click', function() {
+            initialDefinedClasses = []; 
+            const classInputDivs = document.getElementById('class-inputs').children;
+            if (classInputDivs.length === 0) { alert("Please add at least one class type first!"); return; }
+            let validInputs = true;
+            for (let i = 0; i < classInputDivs.length; i++) {
+                const classDiv = classInputDivs[i]; const id = classDiv.id.split('-')[1];
+                const nameInput = document.getElementById(`class-name-${id}`);
+                const hoursInput = document.getElementById(`class-hours-${id}`); 
+                const weeklyInput = document.getElementById(`class-weekly-${id}`);
+                const name = nameInput.value.trim() || `Class Type ${parseInt(id) + 1}`;
+                const hours = parseFloat(hoursInput.value); const weekly = parseInt(weeklyInput.value);
+                if (!nameInput.value.trim()) { alert(`Please enter a name for Class Type ${parseInt(id) + 1}.`); nameInput.focus(); validInputs = false; break; }
+                initialDefinedClasses.push({ id, name, hoursPerClass: hours, weeklyCount: weekly, totalHours: hours * weekly * 12 });
+            }
+            if (!validInputs) return;
+            
+            initialTotalRequiredHoursGlobal = initialDefinedClasses.reduce((sum, cls) => sum + cls.totalHours, 0);
+            if (initialTotalRequiredHoursGlobal === 0) { alert("Total required hours is zero. Ensure class hours and weekly sessions > 0."); return; }
+            
+            const minAttendanceHours = initialTotalRequiredHoursGlobal * 0.8;
+            initialTotalAllowedToMissHours = parseFloat((initialTotalRequiredHoursGlobal * 0.2).toFixed(2));
+            
+            initialDefinedClasses.forEach(cls => { 
+                cls.skippableIndividually = cls.hoursPerClass > 0 ? Math.floor(initialTotalAllowedToMissHours / cls.hoursPerClass) : 0; 
+            });
+            
+            document.getElementById('semester-overview-text').innerHTML = `
+                <p><strong>Total Scheduled Hours (12 weeks):</strong> <span class="value">${initialTotalRequiredHoursGlobal.toFixed(1)} hrs</span></p>
+                <p><strong>Minimum Attendance Required (80%):</strong> <span class="value">${minAttendanceHours.toFixed(1)} hrs</span></p>
+                <p><strong>Total Hours You Can Afford to Miss:</strong> <span class="value" style="color: var(--info-color); font-weight: 700;">${initialTotalAllowedToMissHours.toFixed(1)} hrs</span></p>
+            `;
+            document.getElementById('total-allowed-missed-value').textContent = initialTotalAllowedToMissHours.toFixed(1);
+            document.getElementById('total-allowed-missed-value').className = initialTotalAllowedToMissHours <= 0.01 ? 'hours-value zero' : 'hours-value';
+
+            const initialSkippableBody = document.getElementById('initial-skippable-body');
+            initialSkippableBody.innerHTML = '';
+            if (initialDefinedClasses.length > 0) {
+                initialDefinedClasses.forEach(cls => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${cls.name}</td><td>${cls.hoursPerClass.toFixed(1)}</td><td>${cls.skippableIndividually}</td>`;
+                    initialSkippableBody.appendChild(row);
+                });
+            }
+            
+            generateAndDisplayCombinations(initialTotalAllowedToMissHours, initialDefinedClasses, 'initial-combinations-list', 'initial-combinations-intro', `Optimal ways to use your initial ${initialTotalAllowedToMissHours.toFixed(1)} skippable hours`);
+            
+            document.getElementById('initial-results').style.display = 'block';
+            document.getElementById('already-skipped-section').style.display = 'block';
+            document.getElementById('remaining-results').style.display = 'none'; // Hide remaining results if re-calculating initial
+            populateAlreadySkippedInputs();
+            document.getElementById('overview-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        document.getElementById('recalculate-remaining-btn').addEventListener('click', function() {
+            if (initialDefinedClasses.length === 0 || initialTotalRequiredHoursGlobal === 0) {
+                alert("Please calculate initial allowance first by defining your classes.");
+                return;
+            }
+            let totalHoursActuallySkippedSoFar = 0;
+            initialDefinedClasses.forEach(cls => {
+                const countSkippedInput = document.getElementById(`skipped-count-${cls.id}`);
+                if (countSkippedInput) {
+                    const count = parseInt(countSkippedInput.value) || 0;
+                    totalHoursActuallySkippedSoFar += count * cls.hoursPerClass;
+                }
+            });
+            totalHoursActuallySkippedSoFar = parseFloat(totalHoursActuallySkippedSoFar.toFixed(2));
+
+            const remainingSkippableBudget = parseFloat(Math.max(0, initialTotalAllowedToMissHours - totalHoursActuallySkippedSoFar).toFixed(2));
+            
+            const currentAttendedHours = initialTotalRequiredHoursGlobal - totalHoursActuallySkippedSoFar;
+            const currentAttendancePercentage = (initialTotalRequiredHoursGlobal > 0) ? (currentAttendedHours / initialTotalRequiredHoursGlobal) * 100 : 0;
+            const isNowOnBarrierList = currentAttendancePercentage < 79.99; 
+
+            const currentStatusCard = document.getElementById('current-status-card');
+            const currentStatusDisplay = document.getElementById('current-attendance-status-display');
+            const currentAttendanceDetailsDiv = document.getElementById('current-attendance-details');
+            const statusIcon = isNowOnBarrierList ? '🚨' : '✅';
+            const statusText = isNowOnBarrierList ? 'BARRIER LIST WARNING' : 'CURRENTLY SAFE';
+            const statusClass = isNowOnBarrierList ? 'danger' : 'safe';
+            currentStatusDisplay.innerHTML = `<span class="status-badge ${statusClass}"><span class="icon">${statusIcon}</span> ${statusText}</span>`;
+            currentAttendanceDetailsDiv.innerHTML = `
+                <p><strong>Total Hours Scheduled:</strong> <span class="value">${initialTotalRequiredHoursGlobal.toFixed(1)} hrs</span></p>
+                <p><strong>Hours You've Skipped:</strong> <span class="value">${totalHoursActuallySkippedSoFar.toFixed(1)} hrs</span></p>
+                <p><strong>Effective Hours Attended:</strong> <span class="value">${currentAttendedHours.toFixed(1)} hrs</span></p>
+                <p><strong>Current Attendance Percentage:</strong> <span class="value" style="color: var(--${statusClass}-color); font-weight:700;">${currentAttendancePercentage.toFixed(1)}%</span></p>
+            `;
+             if (isNowOnBarrierList) {
+                currentAttendanceDetailsDiv.innerHTML += `<p style="color: var(--danger-color); font-weight: bold; text-align:center; border-top: 1px solid var(--medium-gray); padding-top:10px;">You are below the 80% attendance threshold!</p>`;
+            }
+            currentStatusCard.style.display = 'block';
+
+            const remainingOverviewCard = document.getElementById('remaining-overview-card');
+            const remainingOverviewText = document.getElementById('remaining-overview-text');
+            remainingOverviewText.innerHTML = `
+                <p><strong>Initial Total Skippable Budget:</strong> <span class="value">${initialTotalAllowedToMissHours.toFixed(1)} hrs</span></p>
+                <p><strong>Hours Already Skipped by You:</strong> <span class="value">${totalHoursActuallySkippedSoFar.toFixed(1)} hrs</span></p>
+                <p><strong>Current Remaining Skippable Hours:</strong> <span class="value" style="color: ${remainingSkippableBudget > 0.01 ? 'var(--info-color)' : 'var(--secondary-color)'}; font-weight: 700;">${remainingSkippableBudget.toFixed(1)} hrs</span></p>
+            `;
+            remainingOverviewCard.style.display = 'block';
+
+            const classesForRemainingCombinations = initialDefinedClasses.map(cls => ({ ...cls }));
+            let remainingCombinationsIntroText = `With your remaining ${remainingSkippableBudget.toFixed(1)} hours, optimal skips are`;
+            if (isNowOnBarrierList) {
+                if (remainingSkippableBudget > 0.01) {
+                    remainingCombinationsIntroText = `You're on the barrier list. If you were to skip these additional ${remainingSkippableBudget.toFixed(1)} hours optimally:`;
+                } else {
+                    remainingCombinationsIntroText = `You're on the barrier list and have no more skippable hours.`;
+                }
+            }
+            generateAndDisplayCombinations(remainingSkippableBudget, classesForRemainingCombinations, 'remaining-combinations-list', 'remaining-combinations-intro', remainingCombinationsIntroText);
+
+            document.getElementById('remaining-results').style.display = 'block';
+            currentStatusCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        
+        addClass({ name: 'Lecture', hours: '2', weekly: '2' });
+        addClass({ name: 'Tutorial', hours: '1', weekly: '1' });
+    </script>
+</body>
+</html>
