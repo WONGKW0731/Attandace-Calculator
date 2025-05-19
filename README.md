@@ -2,6 +2,8 @@
 
 A client-side web application designed to help students strategically plan and track their class attendance. Calculate your initial "skip budget" for a semester (based on a 12-week period and an 80% minimum attendance target), and then dynamically update your remaining skippable hours as you use them. Get insights into your current attendance status and optimal ways to use your remaining skip allowance.
 
+link for access: (https://wongkw0731.github.io/Attandace-Calculator/)
+
 <!-- Optional: Add a screenshot or GIF here -->
 ![image](https://github.com/user-attachments/assets/88e51475-d270-45c4-9df3-ee3364a57017)![image](https://github.com/user-attachments/assets/415ae333-3a93-44e0-9197-7a676f1f9f38)![image](https://github.com/user-attachments/assets/50f1df3a-10a1-4514-93a5-7e38e4a0e6a6)![image](https://github.com/user-attachments/assets/a1748de3-ca32-4df7-ba95-72e0827a3a16)![image](https://github.com/user-attachments/assets/0d908286-cf9c-482b-8b6d-6b2c4041978a)
 
